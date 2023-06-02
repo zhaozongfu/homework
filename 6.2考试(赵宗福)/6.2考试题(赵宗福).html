@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: aliceblue;
+      }
+      .book {
+        border-radius: 10px;
+        margin: auto;
+        width: 1200px;
+        height: 600px;
+        background-image: url("./背景.jpg");
+        background-repeat: repeat-y;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+      }
+      table {
+        color: rgb(206, 185, 185);
+        border-collapse: collapse;
+        margin: auto;
+        text-align: center;
+        width: 1070px;
+        border: 1px solid aliceblue;
+      }
+      thead {
+        background-color: gray;
+      }
+      tbody tr:hover {
+        background-color: #8a988e;
+      }
+      .h2 {
+        margin-top: 20px;
+        color: aliceblue;
+        text-align: center;
+      }
+      button {
+        width: 80px;
+        height: 30px;
+        background-color: rgb(189, 184, 184);
+        border-radius: 10px;
+        color: aliceblue;
+        border: none;
+      }
+      button:active {
+        background-color: gray;
+      }
+
+      .aaa:active {
+        background-color: gray;
+      }
+      .kkk:active {
+        background-color: gray;
+      }
+      tr {
+        height: 50px;
+      }
+      #boxx {
+        height: 480px;
+        overflow: auto;
+      }
+      .box1 {
+        width: 300px;
+        height: 300px;
+        background-color: rgb(95, 96, 97);
+        opacity: 0.9;
+        text-align: center;
+        line-height: 35px;
+        margin: auto;
+        border-radius: 20px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+      }
+      .kkk,
+      .aaa {
+        width: 80px;
+        height: 30px;
+        background-color: rgb(189, 184, 184);
+        border-radius: 10px;
+        color: aliceblue;
+        border: none;
+      }
+      #addTea {
+        margin-left: 10px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box1">
+      <h2>添加茶叶</h2>
+      <form action="">
+        茶叶名称: <input type="text" name="name" /><br />
+        茶叶类型: <input type="radio" name="type" value="绿茶" checked />绿茶
+        <input type="radio" name="type" value="红茶" />红茶
+        <input type="radio" name="type" value="黑茶" />黑茶<br />
+        茶叶价格: <input type="number" name="price" /><br />
+        茶叶库存: <input type="number" name="stock" /><br />
+        茶叶描述: <input type="text" name="description" /><br />
+        <input type="submit" class="kkk" value="提交" />
+        <button id="www">取消</button>
+      </form>
+    </div>
+
+    <div class="book">
+      <button id="addTea">添加茶叶</button>
+      <h2 class="h2">茶叶管理</h2>
+      <div id="boxx">
+        <table border="1">
+          <thead>
+            <tr>
+              <td>ID</td>
+              <td>茶叶名称</td>
+              <td>茶叶类型</td>
+              <td>茶叶价格</td>
+              <td>茶叶库存</td>
+              <td>茶叶描述</td>
+              <td>创建时间</td>
+              <td>更新时间</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const box = document.getElementById("boxx");
+      const www = document.getElementById("www");
+      const box1 = document.querySelector(".box1");
+      const kkk = document.querySelector(".kkk");
+      const h2 = document.querySelector("h2");
+      const form = document.querySelector("form");
+      const tbody = document.querySelector("tbody");
+      const addTea = document.getElementById("addTea");
+      let tadata = [],
+        thisIndex;
+      (function () {
+        chayeStyle();
+        box.addEventListener("click", boxFun);
+        form.addEventListener("submit", tableFun);
+        www.addEventListener("click", wwwFun);
+        addTea.addEventListener("click", addTeaFun);
+      })();
+      function addTeaFun() {
+        h2.innerHTML = "添加茶叶";
+        box1.style.display = "block";
+        form.reset();
+      }
+      function wwwFun() {
+        box1.style.display = "none";
+        form.reset();
+      }
+      function tableFun() {
+        event.preventDefault();
+        kkk.style.display = "inline-block";
+        let data = new FormData(this);
+        console.log(data);
+        if (h2.innerHTML == "添加茶叶") {
+          const ajax = new XMLHttpRequest();
+          ajax.open("post", "https://liu.zzgoodqc.cn/teas");
+          ajax.send(data);
+          ajax.responseType = "json";
+          ajax.onload = function () {
+            chayeStyle();
+            box1.style.display = "none";
+          };
+        }
+        if (h2.innerHTML == "修改茶叶") {
+          let obj = {
+            name: data.get("name"),
+            price: data.get("price"),
+            stock: data.get("stock"),
+            type: data.get("type"),
+            description: data.get("description"),
+          };
+          fetch("https://liu.zzgoodqc.cn/teas/" + tadata[thisIndex].id, {
+            method: "put",
+            headers: {
+              "Content-Type": "application/json;",
+            },
+            body: JSON.stringify(obj),
+          })
+            .then((response) => {
+              return response.json();
+            })
+            .then((res) => {
+              console.log(res);
+              chayeStyle();
+              box1.style.display = "none";
+            });
+          console.log(obj);
+        }
+      }
+      //删除
+      function boxFun() {
+        event.preventDefault();
+        if (
+          event.target.nodeName == "BUTTON" &&
+          event.target.innerHTML == "删除" &&
+          confirm("确认要删除吗？")
+        ) {
+          //   form.reset();
+          let id = event.target.dataset.id;
+          const ajax = new XMLHttpRequest();
+          ajax.open("DELETE", "https://liu.zzgoodqc.cn/teas/" + id);
+          ajax.send();
+          ajax.responseType = "json";
+          ajax.onload = function () {
+            chayeStyle();
+          };
+        }
+        if (
+          event.target.nodeName == "BUTTON" &&
+          event.target.innerHTML == "查看"
+        ) {
+          box1.style.display = "block";
+          kkk.style.display = "none";
+          let id = event.target.dataset.id;
+          const ajax = new XMLHttpRequest();
+          ajax.open("get", "https://liu.zzgoodqc.cn/teas/" + id);
+          ajax.send();
+          ajax.responseType = "json";
+          ajax.onload = function () {
+            console.log(ajax.response);
+          };
+
+          h2.innerHTML = "查看茶叶";
+          thisIndex = tadata.findIndex((item) => {
+            return item.id == id;
+          });
+          form.name.value = tadata[thisIndex].name;
+          form.price.value = tadata[thisIndex].price;
+          form.stock.value = tadata[thisIndex].stock;
+          form.type.value = tadata[thisIndex].type;
+          form.description.value = tadata[thisIndex].description;
+        }
+        if (
+          event.target.nodeName == "BUTTON" &&
+          event.target.innerHTML == "修改"
+        ) {
+          kkk.style.display = "inline-block";
+          box1.style.display = "block";
+          h2.innerHTML = "修改茶叶";
+          let id = event.target.dataset.id;
+          console.log(id);
+          thisIndex = tadata.findIndex((item) => {
+            return item.id == id;
+          });
+          form.name.value = tadata[thisIndex].name;
+          form.price.value = tadata[thisIndex].price;
+          form.stock.value = tadata[thisIndex].stock;
+          form.type.value = tadata[thisIndex].type;
+          form.description.value = tadata[thisIndex].description;
+        }
+      }
+      function chayeStyle() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("get", "https://liu.zzgoodqc.cn/teas");
+        xhr.send();
+        xhr.responseType = "json";
+        xhr.onload = function () {
+          tadata = xhr.response.data;
+          console.log(tadata);
+          XRchaye();
+        };
+      }
+      //渲染茶叶页面
+      function XRchaye() {
+        let html = "";
+        tadata.forEach((item, index) => {
+          html += `
+        <tr>
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td>${item.type}</td>
+          <td>${item.price}</td>
+          <td>${item.stock}</td>
+          <td>${item.description}</td>
+          <td>${getdate(item.created_at)}</td>
+          <td>${getdate(item.updated_at)}</td>
+          <td>
+            <button data-id=${item.id}>删除</button>
+            <button data-id=${item.id}>修改</button>
+            <button data-id=${item.id}>查看</button>
+          </td>
+        </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+      }
+      function getdate(date) {
+        let date1 = new Date(date);
+        let year = date1.getFullYear();
+        let month = date1.getMonth();
+        let day = date1.getDate();
+        let hour = date1.getHours();
+        let minute = date1.getMinutes();
+        let second = date1.getSeconds();
+        return `${year} ${month}.${day} ${hour}:${minute}:${second}`;
+      }
+    </script>
+  </body>
+</html>
