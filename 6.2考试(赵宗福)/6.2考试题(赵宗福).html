@@ -301,10 +301,13 @@
       function getdate(date) {
         let date1 = new Date(date);
         let year = date1.getFullYear();
-        let month = date1.getMonth();
+        let month = date1.getMonth() + 1;
         let day = date1.getDate();
         let hour = date1.getHours();
         let minute = date1.getMinutes();
+        if(minute<10){
+          minute = "0" + minute;
+        }
         let second = date1.getSeconds();
         return `${year} ${month}.${day} ${hour}:${minute}:${second}`;
       }
