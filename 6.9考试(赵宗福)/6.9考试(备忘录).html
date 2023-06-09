@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./jquery.js"></script>
+    <style>
+      body {
+        background-color: aliceblue;
+      }
+      #box {
+        width: 500px;
+        height: 600px;
+        background-color: rgb(231, 227, 227);
+        margin: auto;
+      }
+      #box #span {
+        display: block;
+        text-align: center;
+        font-size: 60px;
+        color: brown;
+        position: relative;
+        top: 20px;
+      }
+      #box1 {
+        width: 380px;
+        height: 450px;
+        background-color: #fff;
+        margin: auto;
+        position: relative;
+        top: 40px;
+        box-shadow: 0px 5px 10px rgba(29, 26, 26, 0.5);
+      }
+      #txt {
+        width: 328px;
+        height: 50px;
+        padding-left: 50px;
+        border: none;
+        border-bottom: 1px rgb(231, 227, 227) solid;
+        background-color: #fff;
+        font-size: 20px;
+      }
+      #all {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 9px;
+        left: 5px;
+      }
+      #ul {
+        width: 340px;
+        height: 300px;
+        overflow: auto;
+        list-style: none;
+        position: relative;
+        top: 0px;
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+      li {
+        list-style: none;
+        width: 330px;
+        height: 50px;
+        border-bottom: 1px rgb(231, 227, 227) solid;
+        font-size: 26px;
+        line-height: 50px;
+        font-family: inherit;
+        font-weight: inherit;
+        color: inherit;
+        position: relative;
+        right: 40px;
+        padding-left: 50px;
+      }
+      .www {
+        display: none;
+      }
+      a {
+        text-decoration: none;
+        color: #000;
+      }
+      .a:active {
+        border: 1px solid brown;
+      }
+      #innup {
+        width: 30px;
+        height: 30px;
+        float: left;
+        position: relative;
+        top: 8px;
+        left: -44px;
+      }
+      .a {
+        margin: 7px;
+      }
+      .compulted {
+        text-decoration: line-through;
+        color: #aeabab;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box">
+      <span id="span">备忘录</span>
+      <div id="box1">
+        <input type="checkbox" name="" id="all" />
+        <input type="text" id="txt" placeholder="需要做什么?" />
+        <div id="div">
+          <ul id="ul"></ul>
+          <a href="#"><span id="num" class="a">0</span>个未完成</a>
+          <a href="#" id="searchAll" class="a">所有</a>
+          <a href="#" id="searchactive" class="a">未完成</a>
+          <a href="#" id="completed" class="a">已完成</a>
+          <a href="#" id="clearcompleted" class="a">清除完成项</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      let todolist = null;
+      const ul = document.querySelector("ul");
+      const num = document.getElementById("num");
+      (function () {
+        todolist = getLocalData("todolist");
+        showList();
+        $("#txt").on("keydown", addTodo);
+        $("#all").on("click", allFun);
+        $("ul").on("click", checkfun);
+        $("#searchAll").on("click", AllFun);
+        $("#searchactive").on("click", seefun);
+        $("#completed").on("click", comefun);
+        $("#clearcompleted").on("click", keFun);
+      })();
+
+      //筛选
+      function keFun() {
+        todolist = todolist.filter((item) => {
+          return item.status == false;
+        });
+        localStorage.setItem("todolist", JSON.stringify(todolist));
+        todolist = getLocalData("todolist");
+        showList(todolist);
+      }
+      function comefun() {
+        let tmp = todolist.filter((item) => {
+          return item.status == true;
+        });
+        showList(tmp);
+      }
+      function AllFun() {
+        showList();
+      }
+      function seefun() {
+        let tmp = todolist.filter((item) => {
+          return item.status == false;
+        });
+        showList(tmp);
+      }
+      //全选
+      function allFun() {
+        console.log(this.checked);
+        todolist = todolist.map((item) => {
+          return {
+            ...item,
+            status: this.checked,
+          };
+        });
+        localStorage.setItem("todolist", JSON.stringify(todolist));
+        showList();
+      }
+      //点击复选框改变状态
+      function checkfun() {
+        //console.log(event.target.dataset.id);
+        //找到id
+        if (event.target.nodeName == "INPUT") {
+          let id = event.target.dataset.id;
+          let index = todolist.findIndex((item) => {
+            event.preventDefault();
+            //当前循环的id与如果与点击的id相等就传过去 返回下标
+            return item.id == event.target.dataset.id;
+          });
+          console.log(index);
+          //让他反向 是true反false  是false反true
+          todolist[index].status = !todolist[index].status;
+          localStorage.setItem("todolist", JSON.stringify(todolist));
+        }
+        if (event.target.nodeName == "A" && event.target.innerHTML == "X") {
+          let index = todolist.findIndex((item) => {
+            event.preventDefault();
+            //当前循环的id与如果与点击的id相等就传过去 返回下标
+            return item.id == event.target.dataset.id;
+          });
+          todolist.splice(index, 1);
+          console.log(todolist);
+          localStorage.setItem("todolist", JSON.stringify(todolist));
+        }
+        showList();
+      }
+      //添加一个
+      function addTodo() {
+        if (event.keyCode == 13) {
+          //回车
+          console.log(this.value);
+          let data = {
+            con: this.value,
+            status: false,
+            id: new Date().getTime() + getRandomNm(),
+          };
+          if (this.value) {
+            todolist.push(data);
+          }
+
+          localStorage.setItem("todolist", JSON.stringify(todolist));
+          showList();
+          this.value = "";
+        }
+
+        //setLocalDataa('todolist',todolist)
+      }
+      //4位随机数
+      function getRandomNm() {
+        return Math.floor(Math.random() * 10000);
+      }
+      //显示列表
+      function showList(dataobj = todolist) {
+        if (dataobj.length === 0) {
+          ul.innerHTML = "";
+          return;
+        }
+        let html = "";
+        dataobj.forEach((item, index) => {
+          html += `
+            <li data-id="${item.id}">
+              <input data-id="${item.id}" type="checkbox" id="innup" ${
+            item.status ? "checked" : ""
+          }>
+              <span class="${
+                item.status ? "compulted" : ""
+              }" style="position: relative; left: -24px;">${item.con}</span> 
+              <a href="#" data-id="${
+                item.id
+              }" style="float:right;  margin-right: 15px;">X</a>
+              </li>
+            `;
+        });
+        ul.innerHTML = html;
+        //console.log(todolist);
+        //检查是所有的复选框是否选中
+
+        all.checked = todolist.every((item) => item.status);
+        //统计未完成
+        let tmp = todolist.filter((item) => {
+          return item.status == false;
+        });
+        num.innerHTML = tmp.length;
+      }
+      //获取数组
+      function getLocalData(key) {
+        let data = localStorage.getItem(key);
+        if (data) {
+          return JSON.parse(data);
+        } else {
+          return [];
+        }
+      }
+      console.log(getLocalData("todolist"));
+    </script>
+  </body>
+</html>
